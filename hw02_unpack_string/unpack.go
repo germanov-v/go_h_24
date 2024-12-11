@@ -22,7 +22,7 @@ func Unpack(str string) (string, error) {
 	var symbols = []rune(str)
 
 	// var strBuilder strings.Builder
-	var runesResult []rune
+	var runesResult = make([]rune, 0, len(symbols))
 	for i := 0; i < len(symbols); i++ {
 		if ok, err := isValidArrRunes(symbols, i); !ok {
 			return "", err
