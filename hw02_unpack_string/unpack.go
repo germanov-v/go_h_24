@@ -12,22 +12,16 @@ const (
 var ErrInvalidString = errors.New("invalid string")
 
 func Unpack(str string) (string, error) {
-	//var numberSymbols []string
-	//for i := 0; i <= 9; i++ {
+	// var numberSymbols []string
+	// for i := 0; i <= 9; i++ {
 	//	//	numberSymbols = append(numberSymbols, string(i)) - error if more 57
 	//	//	numberSymbols = append(numberSymbols, string(rune(i))) - error if more 57
 	//	numberSymbols = append(numberSymbols, strconv.Itoa(i))
-	//}
-
-	var symbolRunes []rune
-
-	for i := numberStart; i <= numberLast; i++ {
-		symbolRunes = append(symbolRunes, rune(i))
-	}
+	// }
 
 	var symbols = []rune(str)
 
-	//var strBuilder strings.Builder
+	// var strBuilder strings.Builder
 	var runesResult []rune
 	for i := 0; i < len(symbols); i++ {
 		if ok, err := isValidArrRunes(symbols, i); !ok {
@@ -36,20 +30,20 @@ func Unpack(str string) (string, error) {
 
 		if isNumber(symbols[i]) {
 			// мы же данные провалидировали выше.
-			//var count, errParse = strconv.Atoi(string(symbols[i]))
-			//if errParse != nil {
+			// var count, errParse = strconv.Atoi(string(symbols[i]))
+			// if errParse != nil {
 			//	return "", errParse
-			//}
+			// }
 			// по тз использовать string Repeats - хотя
 			// strBuilder.WriteString(strings.Repeat(string(symbols[i-1]), count))
 			var count = int(symbols[i]) - '0'
 
-			//strBuilder.
+			// strBuilder.
 			if count == 0 {
 				runesResult = runesResult[0 : len(runesResult)-1]
 			} else {
 				for j := 1; j < count; j++ {
-					//strBuilder.WriteRune(symbols[i-1])
+					// strBuilder.WriteRune(symbols[i-1])
 					runesResult = append(runesResult, symbols[i-1])
 				}
 			}
@@ -60,7 +54,7 @@ func Unpack(str string) (string, error) {
 
 	}
 	return string(runesResult), nil
-	//return strBuilder.String(), nil
+	// return strBuilder.String(), nil
 }
 
 func isValidArrRunes(runes []rune, currentIndex int) (bool, error) {
