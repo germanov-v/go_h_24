@@ -34,7 +34,6 @@ func Unpack(str string) (string, error) {
 			// if errParse != nil {
 			//	return "", errParse
 			// }
-			// по тз использовать string Repeats - хотя
 			// strBuilder.WriteString(strings.Repeat(string(symbols[i-1]), count))
 			var count = int(symbols[i]) - '0'
 
