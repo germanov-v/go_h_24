@@ -10,6 +10,8 @@ const (
 )
 
 var ErrInvalidString = errors.New("invalid string")
+var ErrPreviousInvalidItem = errors.New("previous symbol is number and current too")
+var ErrFirstSymbolIsNumber = errors.New("first symbol is number")
 
 func Unpack(str string) (string, error) {
 	// var numberSymbols []string
@@ -59,12 +61,12 @@ func Unpack(str string) (string, error) {
 func isValidArrRunes(runes []rune, currentIndex int) (bool, error) {
 	if currentIndex == 0 {
 		if isNumber(runes[0]) {
-			return false, errors.New("first symbol is number")
+			return false, ErrFirstSymbolIsNumber
 		}
 
 	} else {
 		if isNumber(runes[currentIndex-1]) && isNumber(runes[currentIndex]) {
-			return false, errors.New("previous symbol is number and current too")
+			return false, ErrPreviousInvalidItem
 		}
 	}
 	return true, nil
