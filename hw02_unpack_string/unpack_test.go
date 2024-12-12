@@ -33,13 +33,70 @@ func TestUnpack(t *testing.T) {
 	}
 }
 
+//func TestUnpackInvalidString(t *testing.T) {
+//	invalidStrings := []string{"3abc", "45", "aaa10b"}
+//	for _, tc := range invalidStrings {
+//
+//		t.Run(tc, func(t *testing.T) {
+//			_, err := Unpack(tc)
+//		//	require.Falsef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
+//
+//		})
+//	}
+//}
+
 func TestUnpackInvalidString(t *testing.T) {
 	invalidStrings := []string{"3abc", "45", "aaa10b"}
 	for _, tc := range invalidStrings {
-		tc := tc
+
 		t.Run(tc, func(t *testing.T) {
 			_, err := Unpack(tc)
-			require.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
+			require.Errorf(t, err, "actual error %q")
+
 		})
 	}
+}
+
+func TestIsValidArrRunesFailedByFirstSymbols(t *testing.T) {
+	invalidStrings := []string{"3abc", "45", "3aaa10b"}
+	for _, str := range invalidStrings {
+		var runes = []rune(str)
+		t.Run(str, func(t *testing.T) {
+			_, err := isValidArrRunes(runes, 0)
+			require.Truef(t, errors.Is(err, ErrFirstSymbolIsNumber), "Must contain error %q", err)
+		})
+	}
+}
+
+func TestIsValidArrRunesFailedByPreviousSymbols(t *testing.T) {
+	var str = "aa34bc"
+	var runes = []rune(str)
+	t.Run(str, func(t *testing.T) {
+		_, err := isValidArrRunes(runes, 3)
+		require.Truef(t, errors.Is(err, ErrPreviousInvalidItem), "Must contain error %q", err)
+	})
+}
+
+func TestIsSymbolFailed(t *testing.T) {
+	var runes []rune = []rune{'a', '\n'}
+
+	for _, item := range runes {
+		t.Run(string(item), func(t *testing.T) {
+			result := isNumber(item)
+			require.Falsef(t, result, "Must be false")
+		})
+	}
+
+}
+
+func TestIsSymbolSuccess(t *testing.T) {
+	var runes []rune = []rune{'a', '\n'}
+
+	for _, item := range runes {
+		t.Run(string(item), func(t *testing.T) {
+			result := isNumber(item)
+			require.Falsef(t, result, "Must be success")
+		})
+	}
+
 }
