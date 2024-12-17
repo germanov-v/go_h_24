@@ -128,13 +128,11 @@ func (strMap *SortMap) GetCollection(asc TypeSort, count int) ([]string, error) 
 			result = append(result, strMap.sortedCollection[i])
 		}
 
-		break
-
 	case Desc:
 		for i := len(strMap.sortedCollection) - 1; i >= len(strMap.sortedCollection)-count; i-- {
 			result = append(result, strMap.sortedCollection[i])
 		}
-		break
+
 	default:
 		return nil, fmt.Errorf("Invalid typesort")
 	}
