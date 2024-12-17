@@ -1,0 +1,14 @@
+linters:
+  disable:
+    - exportloopref
+  enable:
+    - copyloopvar
+linters-settings:
+  depguard:
+    list-type: blacklist
+    lists:
+      Main:
+        forbidden:
+          - "github.com/stretchr/testify/assert"
+        allowed:
+          - "github.com/stretchr/testify/require"
