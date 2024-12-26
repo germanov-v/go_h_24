@@ -23,26 +23,40 @@ type ListItem struct {
 type list struct {
 	//List // Remove me after realization.
 	// Place your code here.
+
+	start     *ListItem
+	end       *ListItem
+	lenght    int
+	items     []ListItem        // extra
+	positions map[*ListItem]int // extra
 }
 
 func (l *list) Len() int {
-	return 1
+	return len(l.items)
 }
 
 func (l *list) Front() *ListItem {
-	return new(ListItem)
+	return l.start
 }
 
 func (l *list) Back() *ListItem {
-	return new(ListItem)
+	return l.end
 }
 
 func (l *list) PushFront(v interface{}) *ListItem {
-	return new(ListItem)
+	item := ListItem{Value: v}
+	item.Next = l.start
+	l.start = &item
+	l.items = append(l.items, item)
+	return &item
 }
 
 func (l *list) PushBack(v interface{}) *ListItem {
-	return new(ListItem)
+	item := ListItem{Value: v}
+	item.Prev = l.end
+	l.end = &item
+	l.items = append(l.items, item)
+	return &item
 }
 
 func (l *list) Remove(i *ListItem) {
