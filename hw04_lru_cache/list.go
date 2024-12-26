@@ -32,7 +32,7 @@ type list struct {
 }
 
 func (l *list) Len() int {
-	return len(l.items)
+	return l.lenght
 }
 
 func (l *list) Front() *ListItem {
@@ -47,7 +47,7 @@ func (l *list) PushFront(v interface{}) *ListItem {
 	item := ListItem{Value: v}
 	item.Next = l.start
 	l.start = &item
-	l.items = append(l.items, item)
+	l.lenght++
 	return &item
 }
 
@@ -55,7 +55,7 @@ func (l *list) PushBack(v interface{}) *ListItem {
 	item := ListItem{Value: v}
 	item.Prev = l.end
 	l.end = &item
-	l.items = append(l.items, item)
+	l.lenght++
 	return &item
 }
 
