@@ -23,3 +23,16 @@ func NewCache(capacity int) Cache {
 		items:    make(map[Key]*ListItem, capacity),
 	}
 }
+
+func (lc *lruCache) Set(key Key, value interface{}) bool {
+
+	return true
+}
+
+func (lc *lruCache) Clear() {
+	lc = &lruCache{
+		capacity: lc.capacity,
+		queue:    NewList(),
+		items:    make(map[Key]*ListItem, lc.capacity),
+	}
+}

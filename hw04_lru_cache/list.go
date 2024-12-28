@@ -61,7 +61,7 @@ func (l *list) PushBack(v interface{}) *ListItem {
 	return &item
 }
 
-// TODO: has param 'i' actual pointers ? => O(1) without loop ?
+// TODO: has param 'i' actual pointers ? => O(1) without loop
 func (l *list) Remove(i *ListItem) {
 
 	if i.Prev != nil && i.Next != nil {
