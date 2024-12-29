@@ -45,8 +45,12 @@ func (l *list) Back() *ListItem {
 
 func (l *list) PushFront(v interface{}) *ListItem {
 	item := ListItem{Value: v}
-	item.Next = l.start
-	l.start.Prev = &item
+	if l.start != nil {
+		item.Next = l.start
+		l.start.Prev = &item
+	} else {
+		l.end = &item
+	}
 	l.start = &item
 	l.lenght++
 	return &item
@@ -54,8 +58,13 @@ func (l *list) PushFront(v interface{}) *ListItem {
 
 func (l *list) PushBack(v interface{}) *ListItem {
 	item := ListItem{Value: v}
-	item.Prev = l.end
-	l.end.Next = &item
+	if l.end != nil {
+		item.Prev = l.end
+		l.end.Next = &item
+	} else {
+		l.start = &item
+	}
+
 	l.end = &item
 	l.lenght++
 	return &item
@@ -63,6 +72,10 @@ func (l *list) PushBack(v interface{}) *ListItem {
 
 // TODO: has param 'i' actual pointers ? => O(1) without loop
 func (l *list) Remove(i *ListItem) {
+
+	if i == nil {
+		return
+	}
 
 	if i.Prev != nil && i.Next != nil {
 		i.Prev.Next = i.Next
@@ -99,5 +112,5 @@ func (l *list) MoveToFront(i *ListItem) {
 	i.Next = l.start
 	l.start.Prev = i
 	i.Prev = nil
-
+	l.start = i
 }
