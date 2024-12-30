@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	hw04lrucache "github.com/go_h_24/hw04_lru_cache"
+	hw04lrucache "github.com/germanov-v/go_h_24/hw04_lru_cache"
 )
 
 func main() {
