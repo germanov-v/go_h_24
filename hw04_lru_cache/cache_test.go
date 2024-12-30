@@ -51,6 +51,44 @@ func TestCache(t *testing.T) {
 
 	t.Run("purge logic", func(t *testing.T) {
 		// Write me
+		c := NewCache(5)
+		_ = c.Set("a", 1)
+		_ = c.Set("b", 2)
+		_ = c.Set("c", 2)
+		_ = c.Set("dd", 3)
+		_, ok := c.Get("a")
+		require.True(t, ok)
+
+		c.Clear()
+		_, ok = c.Get("a")
+		require.False(t, ok)
+	})
+
+	t.Run("substitute by capacity", func(t *testing.T) {
+		// Write me
+		c := NewCache(2)
+		_ = c.Set("a", 1)
+		_ = c.Set("b", 2)
+		_ = c.Set("c", 2)
+		_ = c.Set("dd", 3)
+		_, ok := c.Get("a")
+		require.False(t, ok, "Need value ok = false")
+
+	})
+
+	t.Run("substitute by time getting", func(t *testing.T) {
+		// Write me
+		c := NewCache(3)
+		_ = c.Set("a", 1)
+		_ = c.Set("b", 2)
+		_ = c.Set("c", 3) // need substitute
+		_, ok := c.Get("a")
+		require.True(t, ok, "Need value ok = false")
+		_, ok = c.Get("b")
+		require.True(t, ok)
+		_ = c.Set("d", 4)
+		_, ok = c.Get("c")
+		require.False(t, ok)
 	})
 }
 
