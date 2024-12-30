@@ -48,4 +48,42 @@ func TestList(t *testing.T) {
 		}
 		require.Equal(t, []int{70, 80, 60, 40, 10, 30, 50}, elems)
 	})
+
+	t.Run("empty list", func(t *testing.T) {
+		l := NewList()
+
+		require.Equal(t, 0, l.Len())
+		require.Nil(t, l.Front())
+		require.Nil(t, l.Back())
+	})
+}
+
+func TestListBAsicOperations(t *testing.T) {
+	t.Run("basic operations", func(t *testing.T) {
+		l := NewList()
+
+		one := l.PushFront(1)
+		two := l.PushBack(2)
+		_ = l.PushFront(0) // need getting [0, 1, 2]
+		require.Equal(t, 3, l.Len())
+		require.Equal(t, 0, l.Front().Value)
+		require.Equal(t, 2, l.Back().Value)
+
+		l.Remove(one) // need getting [1, 2]
+
+		require.Equal(t, 2, l.Len())
+		frontValue := l.Front().Value
+		require.Equal(t, 0, frontValue)
+		require.Equal(t, 2, l.Back().Value)
+
+		l.MoveToFront(two) // [2, 0]
+		require.Equal(t, 2, l.Front().Value)
+		require.Equal(t, 0, l.Back().Value)
+
+		l.Remove(l.Front()) // [0]
+		l.Remove(l.Back())  // empty? TODO: debug
+		require.Equal(t, 0, l.Len())
+		require.Nil(t, l.Front()) // t.start = nil
+		require.Nil(t, l.Back())  // t.end = nil
+	})
 }
