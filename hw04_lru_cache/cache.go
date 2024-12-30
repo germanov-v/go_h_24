@@ -29,33 +29,32 @@ func NewCache(capacity int) Cache {
 }
 
 func (lc *lruCache) Set(key Key, value interface{}) bool {
-	existed := false
+
 	if item, ok := lc.items[key]; ok {
 		item.Value = itemCache{value: value, key: key}
 		lc.queue.MoveToFront(item)
-		existed = true
-	} else {
-		if lc.capacity == lc.queue.Len() {
-			removeItem := lc.queue.Back()
-			removeItemValue := removeItem.Value.(itemCache)
-			lc.queue.Remove(removeItem)
-			delete(lc.items, removeItemValue.key)
-		}
-		newItem := lc.queue.PushFront(itemCache{value: value, key: key})
-		lc.items[key] = newItem
+		return true
 	}
+	if lc.capacity == lc.queue.Len() {
+		removeItem := lc.queue.Back()
+		removeItemValue := removeItem.Value.(itemCache)
+		lc.queue.Remove(removeItem)
+		delete(lc.items, removeItemValue.key)
+	}
+	newItem := lc.queue.PushFront(itemCache{value: value, key: key})
+	lc.items[key] = newItem
 
-	return existed
+	return false
 }
 
 func (lc *lruCache) Get(key Key) (interface{}, bool) {
-	if item, ok := lc.items[key]; !ok {
+	item, ok := lc.items[key]
+	if !ok {
 		return nil, ok
-	} else {
-		lc.queue.MoveToFront(item)
-		needValue := item.Value.(itemCache)
-		return needValue.value, ok
 	}
+	lc.queue.MoveToFront(item)
+	needValue := item.Value.(itemCache)
+	return needValue.value, ok
 }
 
 func (lc *lruCache) Clear() {

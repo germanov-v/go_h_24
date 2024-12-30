@@ -80,7 +80,7 @@ func (l *list) Remove(i *ListItem) {
 	if i.Prev != nil && i.Next != nil {
 		i.Prev.Next = i.Next
 		i.Next.Prev = i.Prev
-		i.Prev = nil
+		//i.Prev = nil
 	} else if i.Prev != nil {
 		i.Prev.Next = nil
 		l.end = i.Prev
@@ -99,7 +99,8 @@ func (l *list) Remove(i *ListItem) {
 func (l *list) MoveToFront(i *ListItem) {
 
 	if l.start == i && i.Prev != nil {
-		panic("plan went wrong: l.start == i && i.Prev != nil")
+		i.Prev = nil
+		return
 	} else if l.start == i {
 		return
 	}
