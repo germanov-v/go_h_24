@@ -76,13 +76,14 @@ func RunCh(tasks []Task, countWorkers, countErrors int) error {
 	ch := make(chan Task, countWorkers)
 
 	go func() {
-		for i := 0; i < len(tasks); i++ {
-			ch <- tasks[i]
+		//	for i := 0; i < len(tasks); i++ {
+		for _, item := range tasks {
+			ch <- item
 		}
 		close(ch)
 	}()
 
-	for t := range ch {
+	for i := 0; i < countWorkers; i++ {
 		lock.Lock()
 		if needStopByLimitErrors {
 			lock.Unlock()
@@ -94,7 +95,7 @@ func RunCh(tasks []Task, countWorkers, countErrors int) error {
 			defer wg.Done()
 			//defer lock.Unlock()
 
-			for {
+			for t := range ch {
 
 				lock.Lock()
 				if needStopByLimitErrors || len(tasks) == 0 {
@@ -103,8 +104,7 @@ func RunCh(tasks []Task, countWorkers, countErrors int) error {
 				}
 				lock.Unlock()
 
-				err := t()
-				if err != nil {
+				if err := t(); err != nil {
 					lock.Lock()
 					currentCountErrors++
 					if countErrors <= currentCountErrors {
