@@ -18,38 +18,38 @@ func Run(tasks []Task, countWorkers, countErrors int) error {
 	needStopByLimitErrors := false
 	currentCountErrors := 0
 	for i := 0; i < countWorkers; i++ {
+		lock.Lock()
 		if needStopByLimitErrors {
+			lock.Unlock()
 			break
 		}
+		lock.Unlock()
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			defer lock.Unlock()
+			//defer lock.Unlock()
 
 			for {
-				if needStopByLimitErrors {
+
+				lock.Lock()
+				if needStopByLimitErrors || len(tasks) == 0 {
+					lock.Unlock()
 					break
 				}
 				var task Task
-				lock.Lock()
-				if len(tasks) == 0 {
-					break
-				}
 				task = tasks[0]
 				tasks = tasks[1:]
 				lock.Unlock()
 
-				go func() {
-					err := task()
-					if err != nil {
-						lock.Lock()
-						currentCountErrors++
-						if countErrors <= currentCountErrors {
-							needStopByLimitErrors = true
-						}
-						lock.Unlock()
+				err := task()
+				if err != nil {
+					lock.Lock()
+					currentCountErrors++
+					if countErrors <= currentCountErrors {
+						needStopByLimitErrors = true
 					}
-				}()
+					lock.Unlock()
+				}
 
 			}
 
