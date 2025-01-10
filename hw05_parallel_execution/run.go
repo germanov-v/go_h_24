@@ -36,8 +36,7 @@ func Run(tasks []Task, countWorkers, countErrors int) error {
 					lock.Unlock()
 					break
 				}
-				var task Task
-				task = tasks[0]
+				task := tasks[0]
 				tasks = tasks[1:]
 				lock.Unlock()
 
