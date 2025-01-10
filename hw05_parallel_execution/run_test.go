@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -124,4 +125,56 @@ func TestRunCh(t *testing.T) {
 		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
 		require.LessOrEqual(t, int64(elapsedTime), int64(sumTime/2), "tasks were run sequentially?")
 	})
+}
+
+func TestRun_WithoutDeadlock(t *testing.T) {
+	var lock sync.Mutex
+	comletedTasks := 0
+
+	tasks := make([]Task, 10)
+	for i := range tasks {
+		tasks[i] = func() error {
+			lock.Lock()
+			comletedTasks++
+			lock.Unlock()
+			return nil
+		}
+	}
+
+	err := Run(tasks, 5, 15)
+	require.NoError(t, err)
+	require.Equal(t, 10, comletedTasks)
+}
+
+func TestRunCh_WithoutDeadlock(t *testing.T) {
+	var lock sync.Mutex
+	comletedTasks := 0
+
+	tasks := make([]Task, 10)
+	for i := range tasks {
+		tasks[i] = func() error {
+			lock.Lock()
+			comletedTasks++
+			lock.Unlock()
+			return nil
+		}
+	}
+
+	err := RunCh(tasks, 5, 15)
+	require.NoError(t, err)
+	require.Equal(t, 10, comletedTasks)
+}
+
+func TestRun_AllMustFailed(t *testing.T) {
+	tasks := []Task{
+		func() error { return errors.New("1") },
+		func() error { return errors.New("1") },
+		func() error { return errors.New("1") },
+		func() error { return errors.New("1") },
+		func() error { return errors.New("1") },
+		func() error { return errors.New("1") },
+	}
+
+	err := Run(tasks, 2, 4)
+	require.ErrorIs(t, err, ErrErrorsLimitExceeded)
 }
