@@ -64,3 +64,65 @@ func Run(tasks []Task, countWorkers, countErrors int) error {
 
 	return nil
 }
+
+func RunCh(tasks []Task, countWorkers, countErrors int) error {
+	// Place your code here.
+
+	var wg sync.WaitGroup
+	var lock sync.Mutex
+	needStopByLimitErrors := false
+	currentCountErrors := 0
+
+	ch := make(chan Task, countWorkers)
+
+	go func() {
+		for i := 0; i < len(tasks); i++ {
+			ch <- tasks[i]
+		}
+		close(ch)
+	}()
+
+	for t := range ch {
+		lock.Lock()
+		if needStopByLimitErrors {
+			lock.Unlock()
+			break
+		}
+		lock.Unlock()
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			//defer lock.Unlock()
+
+			for {
+
+				lock.Lock()
+				if needStopByLimitErrors || len(tasks) == 0 {
+					lock.Unlock()
+					break
+				}
+				lock.Unlock()
+
+				err := t()
+				if err != nil {
+					lock.Lock()
+					currentCountErrors++
+					if countErrors <= currentCountErrors {
+						needStopByLimitErrors = true
+					}
+					lock.Unlock()
+				}
+
+			}
+
+		}()
+	}
+
+	wg.Wait()
+
+	if needStopByLimitErrors {
+		return ErrErrorsLimitExceeded
+	}
+
+	return nil
+}
