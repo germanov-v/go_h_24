@@ -127,11 +127,8 @@ func RunCh(tasks []Task, countWorkers, countErrors int) error {
 }
 
 func RunChNonBuffer(tasks []Task, countWorkers, countErrors int) error {
-	// Place your code here.
-
 	var wg sync.WaitGroup
 	var lock sync.Mutex
-	needStopByLimitErrors := false
 	currentCountErrors := 0
 
 	ch := make(chan Task)
@@ -142,18 +139,9 @@ func RunChNonBuffer(tasks []Task, countWorkers, countErrors int) error {
 		go func() {
 			defer wg.Done()
 			for t := range ch {
-				lock.Lock()
-				if needStopByLimitErrors {
-					lock.Unlock()
-					return
-				}
-				lock.Unlock()
 				if err := t(); err != nil {
 					lock.Lock()
 					currentCountErrors++
-					if countErrors <= currentCountErrors {
-						needStopByLimitErrors = true
-					}
 					lock.Unlock()
 				}
 
@@ -164,7 +152,6 @@ func RunChNonBuffer(tasks []Task, countWorkers, countErrors int) error {
 	for _, item := range tasks {
 		lock.Lock()
 		if countErrors <= currentCountErrors {
-			needStopByLimitErrors = true
 			lock.Unlock()
 			break
 		}
@@ -172,15 +159,10 @@ func RunChNonBuffer(tasks []Task, countWorkers, countErrors int) error {
 		ch <- item
 	}
 	close(ch)
-	//go func() {
-	//	//	for i := 0; i < len(tasks); i++ {
-	//
-	//
-	//}()
 
 	wg.Wait()
 
-	if needStopByLimitErrors {
+	if countErrors <= currentCountErrors {
 		return ErrErrorsLimitExceeded
 	}
 
