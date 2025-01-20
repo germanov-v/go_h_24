@@ -16,7 +16,6 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 		for _, stage := range stages {
 			current = stage(current)
 		}
-
 		for {
 			select {
 			case <-done:
