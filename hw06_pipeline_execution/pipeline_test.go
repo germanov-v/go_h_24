@@ -53,7 +53,9 @@ func TestPipeline(t *testing.T) {
 		result := make([]string, 0, 10)
 		start := time.Now()
 		for s := range ExecutePipeline(in, nil, stages...) {
-			result = append(result, s.(string))
+			tempData := s
+			temp := tempData.(string)
+			result = append(result, temp)
 		}
 		elapsed := time.Since(start)
 
