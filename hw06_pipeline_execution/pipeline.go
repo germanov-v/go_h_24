@@ -13,6 +13,7 @@ type (
 type Stage func(in In) (out Out)
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
+
 	var out = in // вместо создания make(Bi) - берем просто на чтение
 
 	for _, stageItem := range stages {
