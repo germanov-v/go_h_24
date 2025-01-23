@@ -16,16 +16,22 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 
 	var out = in // вместо создания make(Bi) - берем просто на чтение
 
+	finishClearByDone := func(res <-chan interface{}) {
+		for range res {
+		}
+	}
+
 	for _, stageItem := range stages {
 		// перезаписываем переменную результат передаем дальше ниже в аргумент по функции
-		out = func(in In, stage Stage) Out {
+		out = func(inIntern In, stage Stage) Out {
 			outIntern := make(Bi) // !!!! обычный канал, его будем возвращать
 			go func() {
 				defer close(outIntern)
-				stageIntern := stage(in)
+				stageIntern := stage(inIntern)
 				for {
 					select {
 					case <-done:
+						go finishClearByDone(stageIntern)
 						return
 					case val, ok := <-stageIntern:
 						if !ok { // страхуемся на закрытие канала
@@ -33,6 +39,7 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 						}
 						select { // и еще раз страхуемся, а вдруг  done в это время пришло
 						case <-done:
+							go finishClearByDone(stageIntern)
 							return
 						case outIntern <- val:
 						}

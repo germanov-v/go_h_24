@@ -15,7 +15,7 @@ func ExecutePipelineV1(in In, done In, stages ...Stage) Out {
 			case <-done:
 				for range current {
 
-					_ = <-current
+					<-current
 				}
 				return
 			case val, ok := <-current:
@@ -60,7 +60,7 @@ func ExecutePipelineV2(in In, done In, stages ...Stage) Out {
 			case <-done:
 				for range current {
 
-					_ = <-current
+					<-current
 				}
 				return
 			case val, ok := <-current:
