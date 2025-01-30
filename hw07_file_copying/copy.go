@@ -92,20 +92,55 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	bar := pb.Full.Start64(limit)
 	bar.Set(pb.Bytes, true)
-	bar.SetRefreshRate(time.Millisecond * 50)
+	bar.SetRefreshRate(time.Millisecond)
 
 	bar.SetWriter(os.Stdout)
 	defer bar.Finish()
 	//reader, _ := SetProgressBar(limit, limitReader)
 
 	reader := bar.NewProxyReader(limitReader)
-
-	_, err = io.Copy(destination, reader)
+	time.Sleep(time.Millisecond)
+	//_, err = io.Copy(destination, reader)
+	err = CopyByPartial(destination, reader, 5)
 	if err != nil && err != io.EOF {
 		// ErrCopyFile
 		return fmt.Errorf("coping file was failed %w", err)
 	}
 
+	return nil
+}
+
+func CopyByPartial(dest *os.File, reader *pb.Reader, sizeBuffer int) error {
+
+	if sizeBuffer < 1 {
+		sizeBuffer = 1024
+	}
+	buf := make([]byte, sizeBuffer)
+
+	//for item:=range buf {
+	for {
+		time.Sleep(1_00 * time.Millisecond)
+		// func (r *Reader) Read(p []byte) (n int, err error) {
+		countRead, errReadbuffer := reader.Read(buf) // двигаемся лимитировано через прогрессбар загруженный лимитировнный буфер
+		if countRead > 0 {
+			//countWrite, err := dest.Write(buf[:countRead])
+			_, err := dest.Write(buf[:countRead]) // возврат count не нужно, записываем все что вычитали
+			if err != nil {
+				return fmt.Errorf("long copy error - write to buffer: %w", err)
+			}
+		}
+
+		//
+		// EOF is the error returned by Read when no more input is available.
+		//var EOF = errors.New("EOF")
+		if io.EOF == errReadbuffer { // мы все вычитали
+			break
+		}
+		if errReadbuffer != nil {
+			return fmt.Errorf("long copy error - read : %w", errReadbuffer)
+		}
+
+	}
 	return nil
 }
 
