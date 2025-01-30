@@ -28,6 +28,7 @@ func main() {
 
 	err := Copy(from, to, offset, limit)
 	if err != nil {
+		//panic
 		log.Fatalf("copy error (main): %v\n", err)
 	}
 
