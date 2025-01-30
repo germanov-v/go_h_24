@@ -4,9 +4,74 @@ import (
 	"errors"
 )
 
-var ErrInvalidString = errors.New("invalid string")
+const (
+	numberStart = 48
+	numberLast  = 57
+)
 
-func Unpack(_ string) (string, error) {
-	// Place your code here.
-	return "", nil
+var ErrInvalidString = errors.New("invalid string")
+var ErrPreviousInvalidItem = errors.New("previous symbol is number and current too")
+var ErrFirstSymbolIsNumber = errors.New("first symbol is number")
+
+func Unpack(str string) (string, error) {
+	// var numberSymbols []string
+	// for i := 0; i <= 9; i++ {
+	//	//	numberSymbols = append(numberSymbols, string(i)) - error if more 57
+	//	//	numberSymbols = append(numberSymbols, string(rune(i))) - error if more 57
+	//	numberSymbols = append(numberSymbols, strconv.Itoa(i))
+	// }
+
+	var symbols = []rune(str)
+
+	// var strBuilder strings.Builder
+	var runesResult = make([]rune, 0, len(symbols))
+	for i := 0; i < len(symbols); i++ {
+		if ok, err := isValidArrRunes(symbols, i); !ok {
+			return "", err
+		}
+
+		if isNumber(symbols[i]) {
+			// мы же данные провалидировали выше.
+			// var count, errParse = strconv.Atoi(string(symbols[i]))
+			// if errParse != nil {
+			//	return "", errParse
+			// }
+			// strBuilder.WriteString(strings.Repeat(string(symbols[i-1]), count))
+			var count = int(symbols[i]) - '0'
+
+			// strBuilder.
+			if count == 0 {
+				runesResult = runesResult[0 : len(runesResult)-1]
+			} else {
+				for j := 1; j < count; j++ {
+					// strBuilder.WriteRune(symbols[i-1])
+					runesResult = append(runesResult, symbols[i-1])
+				}
+			}
+
+		} else {
+			runesResult = append(runesResult, symbols[i])
+		}
+
+	}
+	return string(runesResult), nil
+	// return strBuilder.String(), nil
+}
+
+func isValidArrRunes(runes []rune, currentIndex int) (bool, error) {
+	if currentIndex == 0 {
+		if isNumber(runes[0]) {
+			return false, ErrFirstSymbolIsNumber
+		}
+
+	} else {
+		if isNumber(runes[currentIndex-1]) && isNumber(runes[currentIndex]) {
+			return false, ErrPreviousInvalidItem
+		}
+	}
+	return true, nil
+}
+
+func isNumber(symbol rune) bool {
+	return symbol >= numberStart && symbol <= numberLast
 }
