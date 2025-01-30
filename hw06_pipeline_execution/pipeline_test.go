@@ -153,3 +153,91 @@ func TestAllStageStop(t *testing.T) {
 
 	})
 }
+
+func TestAdditionalPipeline(t *testing.T) {
+	g := func(_ string, f func(v interface{}) interface{}) Stage {
+		return func(in In) Out {
+			out := make(Bi)
+			go func() {
+				defer close(out)
+				for v := range in {
+					time.Sleep(sleepPerStage)
+					out <- f(v)
+				}
+			}()
+			return out
+		}
+	}
+
+	stages := []Stage{
+		g("Empty additional", func(v interface{}) interface{} { return v }),
+		g("Additional икс 2", func(v interface{}) interface{} { return v.(int) * 2 }),
+		g("Additional +100", func(v interface{}) interface{} { return v.(int) + 100 }),
+		g("Itoa", func(v interface{}) interface{} { return strconv.Itoa(v.(int)) }),
+	}
+
+	t.Run("empty staging", func(t *testing.T) {
+		in := make(Bi)
+		data := []int{10, 20, 30}
+		go func() {
+			for _, v := range data {
+				in <- v
+			}
+			close(in)
+		}()
+		out := ExecutePipeline(in, nil)
+		var result []interface{}
+		for val := range out {
+			result = append(result, val)
+		}
+		require.Equal(t, []interface{}{10, 20, 30}, result)
+	})
+
+	t.Run("empty IN", func(t *testing.T) {
+		in := make(Bi)
+		close(in)
+		out := ExecutePipeline(in, nil, stages...)
+		var result []interface{}
+		for val := range out {
+			result = append(result, val)
+		}
+		require.Empty(t, result)
+	})
+
+	t.Run("1 stage", func(t *testing.T) {
+		in := make(Bi)
+		go func() {
+			in <- 5
+			in <- 10
+			in <- 15
+			close(in)
+		}()
+		singleStage := g("x2", func(v interface{}) interface{} { return v.(int) * 2 })
+		out := ExecutePipeline(in, nil, singleStage)
+		var result []int
+		for val := range out {
+			result = append(result, val.(int))
+		}
+		require.Equal(t, []int{10, 20, 30}, result)
+	})
+
+	t.Run("max In", func(t *testing.T) {
+		in := make(Bi)
+		dataSize := 20 //1_000
+		go func() {
+			for i := 0; i < dataSize; i++ {
+				in <- i
+			}
+			close(in)
+		}()
+		out := ExecutePipeline(in, nil, stages...)
+		var result []string
+		for val := range out {
+			result = append(result, val.(string))
+		}
+		require.Len(t, result, dataSize)
+		require.Equal(t, "100", result[0])
+		require.Equal(t, "102", result[1])
+	})
+
+}
