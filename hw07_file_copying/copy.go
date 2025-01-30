@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/cheggaaa/pb/v3"
 )
@@ -83,7 +84,16 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	defer destination.Close()
 
 	limitReader := io.LimitReader(src, limit)
-	reader, _ := SetProgressBar(limit, limitReader)
+
+	bar := pb.Full.Start64(limit)
+	bar.Set(pb.Bytes, true)
+	bar.SetRefreshRate(time.Millisecond * 50)
+
+	bar.SetWriter(os.Stdout)
+	defer bar.Finish()
+	//reader, _ := SetProgressBar(limit, limitReader)
+
+	reader := bar.NewProxyReader(limitReader)
 
 	_, err = io.Copy(destination, reader)
 	if err != nil && err != io.EOF {
