@@ -27,7 +27,11 @@ var (
 
 func Copy(fromPath, toPath string, offset, limit int64) error {
 	// Place your code here.
-
+	_, errDestination := os.Stat(toPath)
+	if errDestination == nil {
+		return ErrDestinationExistsFile
+		//	return ErrSourceDestinationSameFile
+	}
 	//if fromPath == toPath {
 	//	return ErrFilePathEqual
 	//}
@@ -55,12 +59,6 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	if err != nil {
 		//ErrGetFileInfo
 		return ErrGetFileInfo
-	}
-
-	_, err = os.Stat(toPath)
-	if err == nil {
-		return ErrDestinationExistsFile
-		//	return ErrSourceDestinationSameFile
 	}
 
 	// под ErrUnsupportedFile: не /dev/nukl, dir, slink, (socket?)
