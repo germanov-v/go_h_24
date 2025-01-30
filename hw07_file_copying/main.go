@@ -13,12 +13,25 @@ var (
 
 func init() {
 	flag.StringVar(&from, "from", "tmp/1.txt", "file to read from")
-	flag.StringVar(&to, "to", "tmp/1.txt", "file to write to")
+	flag.StringVar(&to, "to", "tmp/2.txt", "file to write to")
 	flag.Int64Var(&limit, "limit", 0, "limit of bytes to copy")
 	flag.Int64Var(&offset, "offset", 0, "offset in input file")
 }
 
 func main() {
+	//count := 100
+	//
+	//bar := pb.StartNew(count)
+	//
+	//for i := 0; i < count; i++ {
+	//	bar.Increment()
+	//	time.Sleep(time.Millisecond)
+	//}
+	//
+	//// finish bar
+	//bar.Finish()
+	//
+	//return
 	flag.Parse()
 	// Place your code here.
 
