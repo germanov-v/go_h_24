@@ -14,15 +14,20 @@ var (
 	ErrUnsupportedFile       = errors.New("unsupported file")
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
 
-	ErrOpenFile    = errors.New("open file failed")
-	ErrGetFileInfo = errors.New("file info failed")
-	ErrSeekFile    = errors.New("seek failed")
-	ErrCopyFile    = errors.New("copy file failed")
-	ErrCreateFile  = errors.New("create file failed")
+	ErrOpenFile      = errors.New("open file failed")
+	ErrGetFileInfo   = errors.New("file info failed")
+	ErrSeekFile      = errors.New("seek failed")
+	ErrCopyFile      = errors.New("copy file failed")
+	ErrCreateFile    = errors.New("create file failed")
+	ErrFilePathEqual = errors.New("file path equal")
 )
 
 func Copy(fromPath, toPath string, offset, limit int64) error {
 	// Place your code here.
+
+	if fromPath == toPath {
+		return ErrFilePathEqual
+	}
 
 	src, err := os.Open(fromPath)
 
