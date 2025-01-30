@@ -1,6 +1,7 @@
 package hw03frequencyanalysis
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -79,4 +80,24 @@ func TestTop10(t *testing.T) {
 			require.Equal(t, expected, Top10(text))
 		}
 	})
+}
+
+func TestSortSliceAsc(t *testing.T) {
+	items := []string{"hfgh", "zdsf", "agdf"}
+	sort.Slice(items, func(i int, j int) bool {
+
+		return items[i] < items[j]
+	})
+	require.Truef(t, items[0] == "agdf" && items[1] == "hfgh" && items[2] == "zdsf", "actual error %q")
+
+}
+
+func TestSortSliceDesc(t *testing.T) {
+	items := []string{"hfgh", "zdsf", "agdf"}
+	sort.Slice(items, func(i int, j int) bool {
+
+		return items[i] > items[j]
+	})
+	require.Truef(t, items[0] == "zdsf" && items[1] == "hfgh" && items[2] == "agdf", "actual error %q")
+
 }
