@@ -14,8 +14,11 @@ var (
 	ErrUnsupportedFile       = errors.New("unsupported file")
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
 
-	ErrOpenFile      = errors.New("open file failed")
-	ErrGetFileInfo   = errors.New("file info failed")
+	ErrOpenFile                  = errors.New("open file failed")
+	ErrGetFileInfo               = errors.New("file info failed")
+	ErrSourceDestinationSameFile = errors.New("source file destination are same file")
+	ErrDestinationExistsFile     = errors.New("destination file exists")
+
 	ErrSeekFile      = errors.New("seek failed")
 	ErrCopyFile      = errors.New("copy file failed")
 	ErrCreateFile    = errors.New("create file failed")
@@ -25,9 +28,9 @@ var (
 func Copy(fromPath, toPath string, offset, limit int64) error {
 	// Place your code here.
 
-	if fromPath == toPath {
-		return ErrFilePathEqual
-	}
+	//if fromPath == toPath {
+	//	return ErrFilePathEqual
+	//}
 
 	src, err := os.Open(fromPath)
 
@@ -51,7 +54,13 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	fileInfo, err := src.Stat()
 	if err != nil {
 		//ErrGetFileInfo
-		return fmt.Errorf("gettin filinfo failed %w", err)
+		return ErrGetFileInfo
+	}
+
+	_, err = os.Stat(toPath)
+	if err == nil {
+		return ErrDestinationExistsFile
+		//	return ErrSourceDestinationSameFile
 	}
 
 	// под ErrUnsupportedFile: не /dev/nukl, dir, slink, (socket?)
@@ -100,8 +109,8 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	reader := bar.NewProxyReader(limitReader)
 	time.Sleep(time.Millisecond)
-	//_, err = io.Copy(destination, reader)
-	err = CopyByPartial(destination, reader, 5)
+	_, err = io.Copy(destination, reader)
+	//err = CopyByPartial(destination, reader, 5)
 	if err != nil && err != io.EOF {
 		// ErrCopyFile
 		return fmt.Errorf("coping file was failed %w", err)
