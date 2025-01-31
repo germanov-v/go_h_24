@@ -21,7 +21,6 @@ func TestSetProgressBar(t *testing.T) {
 	progressReader, bar := SetProgressBar(limit, reader)
 
 	bar.Finish()
-	// Читаем данные из прогресс-бара
 	readData, err := io.ReadAll(progressReader)
 	//progressReader.Finish()
 	time.After(5 * time.Millisecond)
@@ -30,5 +29,5 @@ func TestSetProgressBar(t *testing.T) {
 		t.Fatalf("Error reading: %v", err)
 	}
 
-	assert.Equal(t, data, readData, "Data must be equak")
+	assert.Equal(t, data, readData, "Data must be equal")
 }

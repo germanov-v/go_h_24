@@ -30,18 +30,14 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	_, errDestination := os.Stat(toPath)
 	if errDestination == nil {
 		return ErrDestinationExistsFile
-		//	return ErrSourceDestinationSameFile
 	}
-	//if fromPath == toPath {
-	//	return ErrFilePathEqual
-	//}
 
 	src, err := os.Open(fromPath)
 
 	if err != nil {
 		// оборачиваем исходную ошибку. пример:  *os.PathError,
 		// ErrOpenFile
-		return fmt.Errorf("failed open file %w", err)
+		return ErrOpenFile
 	}
 	defer func(src *os.File) {
 		err := src.Close()
@@ -52,9 +48,6 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		}
 	}(src)
 
-	//io.LimitedReader(src)
-
-	// fileinfo
 	fileInfo, err := src.Stat()
 	if err != nil {
 		//ErrGetFileInfo
@@ -76,21 +69,16 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		// выход за границы файла - берем все
 		limit = size - offset
 	}
-
-	//coursor, err = src.Seek(offset, io.SeekStart)
 	_, err = src.Seek(offset, io.SeekStart)
 	if err != nil {
 		//ErrCreateFile
-		return fmt.Errorf("moving coursor was failed %w", err)
+		return ErrSeekFile
 	}
-
-	//reader := SetProgressBar(limit, src)
-	//	_, err = io.Copy(dst)
 
 	destination, err := os.Create(toPath)
 	if err != nil {
 		// ErrSeek
-		return fmt.Errorf("moving coursor was failed %w", err)
+		return ErrCreateFile
 	}
 
 	defer destination.Close()
@@ -111,7 +99,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	//err = CopyByPartial(destination, reader, 5)
 	if err != nil && err != io.EOF {
 		// ErrCopyFile
-		return fmt.Errorf("coping file was failed %w", err)
+		return ErrCopyFile
 	}
 
 	return nil
@@ -124,22 +112,17 @@ func CopyByPartial(dest *os.File, reader *pb.Reader, sizeBuffer int) error {
 	}
 	buf := make([]byte, sizeBuffer)
 
-	//for item:=range buf {
 	for {
 		time.Sleep(1_00 * time.Millisecond)
-		// func (r *Reader) Read(p []byte) (n int, err error) {
 		countRead, errReadbuffer := reader.Read(buf) // двигаемся лимитировано через прогрессбар загруженный лимитировнный буфер
 		if countRead > 0 {
-			//countWrite, err := dest.Write(buf[:countRead])
 			_, err := dest.Write(buf[:countRead]) // возврат count не нужно, записываем все что вычитали
 			if err != nil {
 				return fmt.Errorf("long copy error - write to buffer: %w", err)
 			}
 		}
 
-		//
 		// EOF is the error returned by Read when no more input is available.
-		//var EOF = errors.New("EOF")
 		if io.EOF == errReadbuffer { // мы все вычитали
 			break
 		}
@@ -151,16 +134,10 @@ func CopyByPartial(dest *os.File, reader *pb.Reader, sizeBuffer int) error {
 	return nil
 }
 
-// TODO: начать с теста прогрессбара.
 // https://github.com/cheggaaa/pb
-// из примера: 37158 / 100000 [---------------->_______________________________] 37.16% 916 p/s
 func SetProgressBar(limit int64, reader io.Reader) (*pb.Reader, *pb.ProgressBar) {
 	bar := pb.Full.Start64(limit)
-
-	// bar will format numbers as bytes (B, KiB, MiB, etc)
 	bar.Set(pb.Bytes, true)
-
-	//defer bar.Finish() // просто закрываем
 
 	proxyReader := bar.NewProxyReader(io.LimitReader(reader, limit))
 	return proxyReader, bar
