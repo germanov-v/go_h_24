@@ -19,19 +19,6 @@ func init() {
 }
 
 func main() {
-	//count := 100
-	//
-	//bar := pb.StartNew(count)
-	//
-	//for i := 0; i < count; i++ {
-	//	bar.Increment()
-	//	time.Sleep(time.Millisecond)
-	//}
-	//
-	//// finish bar
-	//bar.Finish()
-	//
-	//return
 	flag.Parse()
 	// Place your code here.
 
