@@ -3,7 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
+	//	"strings"
 )
 
 type EnvironmentItems map[string]string
@@ -35,26 +38,48 @@ func loadEnvironmentItemsByDir(path string) (EnvironmentItems, error) {
 
 // пробуем сплтить и потом конкатинация
 func createNewEnvironment(currentEnv []string, envExt Environment) []string {
-	result := make([]string, len(currentEnv)+len(currentEnv))
+	resultEnv := make([]string, len(currentEnv)+len(envExt))
 
-	return result
+	for _, valEnv := range currentEnv {
+		partItems := strings.SplitN(valEnv, "=", 2)
+		keyEnv := partItems[0]
+
+		if _, ok := envExt[keyEnv]; ok {
+			continue // в новом окружении, уже есть переменная
+		}
+
+		resultEnv = append(resultEnv, keyEnv)
+	}
+
+	return resultEnv
 }
 
 // RunCmd runs a command + arguments (cmd) with environment variables from env.
 func RunCmd(cmd []string, env Environment) (returnCode int) {
 	// Place your code here.
-
+	returnCode = 1
 	if len(cmd) == 0 {
-		_, err := fmt.Fprintln(os.Stderr, "arguments was not set")
-		if err != nil {
-			return -1 // ???
-		}
-		returnCode = 1
+		_, _ = fmt.Fprintln(os.Stderr, "arguments was not set")
+
 		return
 	}
 
 	currentEnvironment := os.Environ()
-	newEnvironment := createNewEnvironment(currentEnvironment, env)
+	newEnv := createNewEnvironment(currentEnvironment, env)
 
-	return returnCode
+	command := exec.Command(cmd[0], cmd[1:]...)
+	command.Env = newEnv
+	command.Stdout = os.Stdout
+	command.Stderr = os.Stderr
+	command.Stdin = os.Stdin
+
+	err := command.Run()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+
+		return
+	}
+
+	returnCode = 0
+	return
 }
