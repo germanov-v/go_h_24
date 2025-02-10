@@ -28,6 +28,15 @@ $ FOO=123 BAR=value command arg1 arg2
 * стандартные потоки ввода/вывода/ошибок пробрасывались в вызываемую программу;
 * код выхода утилиты совпадал с кодом выхода программы.
 
+### Подсказки
+- https://www.unix.com/man-page/debian/8/envdir/
+- `os.Args`
+- `os.ReadDir`
+- `bytes.Replace`, `strings.TrimRight`
+- `exec.Command`
+
+
+
 При необходимости можно выделять дополнительные функции / ошибки.
 
 Юнит-тесты могут использовать файлы из `testdata` или создавать свои директории / файлы,
@@ -40,9 +49,3 @@ $ FOO=123 BAR=value command arg1 arg2
 
 #### Зачёт от 7 баллов
 
-### Подсказки
-- https://www.unix.com/man-page/debian/8/envdir/
-- `os.Args`
-- `os.ReadDir`
-- `bytes.Replace`, `strings.TrimRight`
-- `exec.Command`
