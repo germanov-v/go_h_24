@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,7 +11,7 @@ import (
 	//	"strings"
 )
 
-type EnvironmentItems map[string]string
+type EnvironmentItems map[string]*string
 
 func loadEnvironmentItemsByDir(path string) (EnvironmentItems, error) {
 	data := make(EnvironmentItems)
@@ -30,7 +32,27 @@ func loadEnvironmentItemsByDir(path string) (EnvironmentItems, error) {
 			return nil, err
 		}
 
-		data[key] = string(contentFile)
+		// empty
+		if len(contentFile) == 0 {
+			data[key] = nil // указатель
+			continue
+		}
+
+		//  new => 0x0A
+		contentFile = bytes.ReplaceAll(contentFile, []byte{0}, []byte("\n"))
+
+		rowIndexes := bytes.IndexByte(contentFile, '\n')
+
+		var lineFirst []byte
+
+		if rowIndexes == -1 {
+			lineFirst = contentFile
+		} else {
+			lineFirst = contentFile[:rowIndexes]
+		}
+
+		resultStr := strings.TrimRight(string(lineFirst), "\t") // табуляция
+		data[key] = &resultStr
 
 	}
 	return data, nil
@@ -49,6 +71,15 @@ func createNewEnvironment(currentEnv []string, envExt Environment) []string {
 		}
 
 		resultEnv = append(resultEnv, keyEnv)
+	}
+
+	for ker, value := range envExt {
+		//if value != nil {
+		//	resultEnv = append(resultEnv, ker)
+		//}
+		if !value.NeedRemove {
+			resultEnv = append(resultEnv, ker+"="+value.Value)
+		}
 	}
 
 	return resultEnv
@@ -75,7 +106,14 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 
 	err := command.Run()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+
+		// An ExitError reports an unsuccessful exit by a command.
+		var exitError *exec.ExitError
+		if errors.As(err, &exitError) {
+			return exitError.ExitCode()
+		}
+
+		_, _ = fmt.Fprintln(os.Stderr, err)
 
 		return
 	}
