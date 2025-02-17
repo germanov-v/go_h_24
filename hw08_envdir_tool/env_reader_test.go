@@ -13,10 +13,8 @@ func TestReadDir(t *testing.T) {
 		t.Fatalf("creating dir was failed: %v", err)
 	}
 	defer func(path string) {
-		err := os.RemoveAll(path)
-		if err != nil {
+		_ = os.RemoveAll(path)
 
-		}
 	}(tempDir)
 
 	/// 0644 - owner rw, group - r, others - r

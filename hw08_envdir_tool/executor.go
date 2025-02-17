@@ -1,62 +1,15 @@
 package main
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	//	"strings"
 )
 
 type EnvironmentItems map[string]*string
-
-func loadEnvironmentItemsByDir(path string) (EnvironmentItems, error) {
-	data := make(EnvironmentItems)
-
-	items, err := os.ReadDir(path)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, item := range items {
-		if item.IsDir() {
-			continue
-		}
-		key := item.Name()
-		pathFile := filepath.Join(path, item.Name())
-		contentFile, err := os.ReadFile(pathFile)
-		if err != nil {
-			return nil, err
-		}
-
-		// empty
-		if len(contentFile) == 0 {
-			data[key] = nil // указатель
-			continue
-		}
-
-		//  new => 0x0A
-		contentFile = bytes.ReplaceAll(contentFile, []byte{0}, []byte("\n"))
-
-		rowIndexes := bytes.IndexByte(contentFile, '\n')
-
-		var lineFirst []byte
-
-		if rowIndexes == -1 {
-			lineFirst = contentFile
-		} else {
-			lineFirst = contentFile[:rowIndexes]
-		}
-
-		resultStr := strings.TrimRight(string(lineFirst), "\t") // табуляция
-		data[key] = &resultStr
-
-	}
-	return data, nil
-}
 
 // пробуем сплтить и потом конкатинация
 func createNewEnvironment(currentEnv []string, envExt Environment) []string {
