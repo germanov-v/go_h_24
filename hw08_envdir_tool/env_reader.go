@@ -50,20 +50,24 @@ func ReadDir(dir string) (Environment, error) {
 		}
 
 		//  new => 0x0A
-		contentFile = bytes.ReplaceAll(contentFile, []byte{0}, []byte("\n"))
+		if bytes.Contains(contentFile, []byte("\n")) {
+			rowIndexes := bytes.IndexByte(contentFile, '\n')
 
-		rowIndexes := bytes.IndexByte(contentFile, '\n')
+			var lineFirst []byte
 
-		var lineFirst []byte
-
-		if rowIndexes == -1 {
-			lineFirst = contentFile
+			if rowIndexes == -1 {
+				lineFirst = contentFile
+			} else {
+				lineFirst = contentFile[:rowIndexes]
+			}
+			contentFile = lineFirst
 		} else {
-			lineFirst = contentFile[:rowIndexes]
+			contentFile = bytes.ReplaceAll(contentFile, []byte{0}, []byte("\n"))
 		}
 
 		// strings.TrimSpace(string(lineFirst)) //
-		resultStr := strings.TrimRight(string(lineFirst), " \t") // табуляция
+		//resultStr := strings.TrimRight(string(lineFirst), " \t") // табуляция
+		resultStr := strings.TrimRight(string(contentFile), " \t")
 		data[key] = EnvValue{Value: resultStr, NeedRemove: false}
 
 	}
