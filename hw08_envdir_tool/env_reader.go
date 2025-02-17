@@ -32,6 +32,11 @@ func ReadDir(dir string) (Environment, error) {
 			continue
 		}
 		key := item.Name()
+
+		if strings.Contains(key, "=") {
+			continue
+		}
+
 		pathFile := filepath.Join(dir, item.Name())
 		contentFile, err := os.ReadFile(pathFile)
 		if err != nil {
@@ -57,7 +62,8 @@ func ReadDir(dir string) (Environment, error) {
 			lineFirst = contentFile[:rowIndexes]
 		}
 
-		resultStr := strings.TrimSpace(string(lineFirst)) //strings.Trim(string(lineFirst), "\t") // табуляция
+		// strings.TrimSpace(string(lineFirst)) //
+		resultStr := strings.TrimRight(string(lineFirst), " \t") // табуляция
 		data[key] = EnvValue{Value: resultStr, NeedRemove: false}
 
 	}
