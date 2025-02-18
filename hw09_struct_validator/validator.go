@@ -123,22 +123,40 @@ func containInValidator(values []int) Validator[int] {
 func createStrRuleValidators(tag string) ([]Validator[string], error) {
 	var validators []Validator[string]
 	rules := strings.Split(tag, "|")
-	for index, rule := range rules {
+	for _, rule := range rules {
 		rule = strings.TrimSpace(rule)
-		if rule==""{
+		if rule == "" {
 			continue
 		}
-		parts:=strings.SplitN(rule, ":",2)
+		parts := strings.SplitN(rule, ":", 2)
 		if len(parts) != 2 {
 			return nil, fmt.Errorf("invalid tag rule: %q", rule)
 		}
 
 		switch parts[0] {
 		case "len":
-          expected, err := strconv.Atoi(parts[1])
+			expected, err := strconv.Atoi(parts[1])
+			if err != nil {
+				return nil, fmt.Errorf("invalid tag rule: %q", rule)
+			}
+			validators = append(validators, lenValidator(expected))
 		case "regexp":
+			validators = append(validators, regValidator(parts[1]))
 
-		case "in"
+		case "in":
+			options := strings.Split(parts[1], ",")
+			var items = make([]string, len(options))
+			for _, option := range options {
+				//temp, err := strconv.Atoi(option)
+				//
+				//if err != nil {
+				//	return nil, fmt.Errorf("invalid tag rule: %q - %w ", rule, err)
+				//}
+				items = append(items, strings.TrimSpace(option))
+			}
+			validators = append(validators, containStrValidator(items))
+		default:
+			return nil, fmt.Errorf("invalid tag rule: %q", rule)
 		}
 	}
 	return validators, nil
