@@ -39,6 +39,25 @@ func Validate(v interface{}) error {
 		return errors.New("value is not a struct")
 	}
 
+	rt := rv.Type()
+
+	for i := 0; i < rt.NumField(); i++ {
+		field := rt.Field(i)
+
+		// embed поле
+		//if field.Anonymous {
+		//
+		//}
+
+		// public
+		if !field.IsExported() {
+			continue
+		}
+
+		tag := strings.Split(field.Tag.Get("json"), ",")
+
+	}
+
 	return nil
 }
 
