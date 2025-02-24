@@ -26,7 +26,7 @@ func (v ValidationErrors) Error() string {
 }
 
 func Validate(v interface{}) error {
-	var errs error
+	var errorsResult ValidationErrors
 
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr {
@@ -54,8 +54,124 @@ func Validate(v interface{}) error {
 			continue
 		}
 
-		tag := strings.Split(field.Tag.Get("json"), ",")
+		//tag := strings.Split(field.Tag.Get("json"), ",")
 
+		tag := field.Tag.Get("validate") // empty or nil ?
+		if tag == "" {
+			continue
+		}
+
+		valField := rv.Field(i)
+		nameField := field.Name
+
+		if tag == "nested" {
+			internErr := Validate(valField.Interface())
+			if internErr != nil {
+				var internErrs ValidationErrors
+				// вложенность
+				if errors.As(internErr, &internErrs) {
+					for _, err := range internErrs {
+						errorsResult = append(errorsResult, ValidationError{
+							Field: fmt.Sprintf("%s.%s", field.Name, nameField),
+							Err:   err.Err,
+						})
+					}
+				} else {
+					errorsResult = append(errorsResult, ValidationError{
+						Field: fmt.Sprintf("%s.%s", field.Name, nameField),
+						Err:   internErr,
+					})
+				}
+			}
+			continue
+			//return nil
+		}
+
+		switch valField.Kind() {
+		case reflect.Struct:
+			// парсинг
+			validators, err := createStrRuleValidators(tag)
+			if err != nil {
+				return fmt.Errorf("%s: %w", nameField, err)
+			}
+			s := valField.String()
+			for _, valid := range validators {
+				if err := valid.Validate(s); err != nil {
+					errorsResult = append(errorsResult, ValidationError{
+						Field: fmt.Sprintf("%s.%s", field.Name, nameField),
+						Err:   err,
+					})
+				}
+			}
+		case reflect.Slice:
+			for i := 0; i < valField.Len(); i++ {
+				item := valField.Index(i)
+				//fmt.Print
+				//itemName := fmt.Sprintf("%s.%s", nameField, i)
+				itemName := fmt.Sprintf("%s.%d", nameField, i)
+				switch item.Kind() {
+				//case reflect.Struct:
+				case reflect.String:
+					// todo: в отдельную - копипаст пошел
+					validators, err := createStrRuleValidators(tag)
+					if err != nil {
+						return fmt.Errorf("%s: %w", itemName, err)
+					}
+					s := valField.String()
+					for _, valid := range validators {
+						if err := valid.Validate(s); err != nil {
+							errorsResult = append(errorsResult, ValidationError{
+								Field: fmt.Sprintf("%s.%s", field.Name, nameField),
+								Err:   err,
+							})
+						}
+					}
+				case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+					validators, err := createIntRuleValidators(tag)
+					if err != nil {
+						return fmt.Errorf("%s: %w", itemName, err)
+					}
+					j := int(item.Int()) // обрезать?
+					for _, valid := range validators {
+						if err := valid.Validate(j); err != nil {
+							errorsResult = append(errorsResult, ValidationError{
+								Field: fmt.Sprintf("%s.%s", itemName, nameField),
+								Err:   err,
+							})
+						}
+					}
+				default:
+					//break;
+					continue
+				}
+			}
+
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			validators, err := createIntRuleValidators(tag)
+			if err != nil {
+				return fmt.Errorf("%s: %w", nameField, err)
+			}
+			j := int(valField.Int())
+			for _, valid := range validators {
+				if err := valid.Validate(j); err != nil {
+					errorsResult = append(errorsResult, ValidationError{
+						Field: fmt.Sprintf("%s.%s", nameField, nameField),
+						Err:   err,
+					})
+				}
+			}
+
+		default:
+			//return fmt.Errorf("%s is not a compatible type", valField.Kind())
+			continue
+		}
+
+		//continue
+		//return nil
+	}
+
+	if len(errorsResult) > 0 {
+		return errorsResult
 	}
 
 	return nil
