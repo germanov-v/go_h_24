@@ -24,7 +24,7 @@ type DomainStat map[string]int
 type users [100_000]User // Array
 
 var (
-	emailRegex = regexp.MustCompile(`^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[a-z]{2,4}$`) // !!!!ПОДСМОТРЕЛ!!!! -
+	emailRegex = regexp.MustCompile(`^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[a-z]{2,4}$`)
 )
 
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
