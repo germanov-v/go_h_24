@@ -1,6 +1,7 @@
 package hw10programoptimization
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -20,31 +21,63 @@ type User struct {
 
 type DomainStat map[string]int
 
-func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
-	u, err := getUsers(r)
-	if err != nil {
-		return nil, fmt.Errorf("get users error: %w", err)
-	}
-	return countDomains(u, domain)
-}
-
 type users [100_000]User // Array
 
-func getUsers(r io.Reader) (result users, err error) {
-	content, err := io.ReadAll(r) // stream
-	if err != nil {
-		return
+var (
+	emailRegex = regexp.MustCompile(`^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[a-z]{2,4}$`) // !!!!ПОДСМОТРЕЛ!!!! -
+)
+
+func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
+	//u, err := getUsers(r)
+	//if err != nil {
+	//	return nil, fmt.Errorf("get users error: %w", err)
+	//}
+	//return countDomains(u, domain)
+
+	//file, err := os.Open(domain)
+	//if err != nil {
+	//	return nil, fmt.Errorf("couldn't open the file - alas and ah", err)
+	//}
+	//defer file.Close()
+
+	stats := make(DomainStat)
+
+	fScanner := bufio.NewScanner(r)
+	fScanner.Split(bufio.ScanLines)
+
+	for fScanner.Scan() {
+		var user User
+		//text := fScanner.Text()
+		//
+		//err = json.NewDecoder(strings.NewReader(text)).Decode(&user)
+
+		err := json.Unmarshal(fScanner.Bytes(), &user)
+		if err != nil {
+			continue
+		}
+		err = calcDomains(user, &stats)
+		if err != nil {
+			//	return nil, fmt.Errorf("failed calc domain", err)
+			return nil, err
+		}
+	}
+	return stats, nil
+}
+
+func calcDomains(u User, stats *DomainStat) error {
+	isEmail := emailRegex.MatchString(u.Email)
+	if isEmail {
+		parts := strings.Split(u.Email, "@")
+		if len(parts) != 2 {
+			return fmt.Errorf("invalid email address")
+		}
+		domain := strings.ToLower(parts[1])
+		num := (*stats)[domain]
+		num++
+		(*stats)[domain] = num
 	}
 
-	lines := strings.Split(string(content), "\n")
-	for i, line := range lines {
-		var user User
-		if err = json.Unmarshal([]byte(line), &user); err != nil {
-			return
-		}
-		result[i] = user
-	}
-	return
+	return nil
 }
 
 func countDomains(u users, domain string) (DomainStat, error) {
