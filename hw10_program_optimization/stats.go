@@ -28,10 +28,10 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 	return countDomains(u, domain)
 }
 
-type users [100_000]User
+type users [100_000]User // Array
 
 func getUsers(r io.Reader) (result users, err error) {
-	content, err := io.ReadAll(r)
+	content, err := io.ReadAll(r) // stream
 	if err != nil {
 		return
 	}
@@ -51,7 +51,7 @@ func countDomains(u users, domain string) (DomainStat, error) {
 	result := make(DomainStat)
 
 	for _, user := range u {
-		matched, err := regexp.Match("\\."+domain, []byte(user.Email))
+		matched, err := regexp.Match("\\."+domain, []byte(user.Email)) // вынести из цикла, что нибудь с предкомпиляцией поискать на го
 		if err != nil {
 			return nil, err
 		}
