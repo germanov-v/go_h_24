@@ -24,21 +24,11 @@ type DomainStat map[string]int
 type users [100_000]User // Array
 
 var (
-	emailRegex = regexp.MustCompile(`^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[a-z]{2,4}$`)
+	emailRegex = regexp.MustCompile(`(?i)\.[a-z]{2,4}$`)
+	//regexp.MustCompile(`^[a-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[a-z]{2,4}$`)
 )
 
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
-	//u, err := getUsers(r)
-	//if err != nil {
-	//	return nil, fmt.Errorf("get users error: %w", err)
-	//}
-	//return countDomains(u, domain)
-
-	//file, err := os.Open(domain)
-	//if err != nil {
-	//	return nil, fmt.Errorf("couldn't open the file - alas and ah", err)
-	//}
-	//defer file.Close()
 
 	stats := make(DomainStat)
 
@@ -47,9 +37,6 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 
 	for fScanner.Scan() {
 		var user User
-		//text := fScanner.Text()
-		//
-		//err = json.NewDecoder(strings.NewReader(text)).Decode(&user)
 
 		err := json.Unmarshal(fScanner.Bytes(), &user)
 		if err != nil {
@@ -65,35 +52,15 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 }
 
 func calcDomains(u User, stats *DomainStat) error {
-	isEmail := emailRegex.MatchString(u.Email)
-	if isEmail {
-		parts := strings.Split(u.Email, "@")
-		if len(parts) != 2 {
-			return fmt.Errorf("invalid email address")
-		}
-		domain := strings.ToLower(parts[1])
-		num := (*stats)[domain]
-		num++
-		(*stats)[domain] = num
+
+	if u.Email == "" || !emailRegex.MatchString(u.Email) {
+		return nil
 	}
 
+	_, domain, found := strings.Cut(u.Email, "@")
+	if !found {
+		return fmt.Errorf("invalid email address")
+	}
+	(*stats)[strings.ToLower(domain)]++
 	return nil
-}
-
-func countDomains(u users, domain string) (DomainStat, error) {
-	result := make(DomainStat)
-
-	for _, user := range u {
-		matched, err := regexp.Match("\\."+domain, []byte(user.Email)) // вынести из цикла, что нибудь с предкомпиляцией поискать на го
-		if err != nil {
-			return nil, err
-		}
-
-		if matched {
-			num := result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]
-			num++
-			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = num
-		}
-	}
-	return result, nil
 }

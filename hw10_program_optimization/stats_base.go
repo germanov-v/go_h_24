@@ -2,19 +2,10 @@ package hw10programoptimization
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"regexp"
 	"strings"
 )
-
-func GetDomainStat1(r io.Reader, domain string) (DomainStat, error) {
-	u, err := getUsers1(r)
-	if err != nil {
-		return nil, fmt.Errorf("get users error: %w", err)
-	}
-	return countDomains(u, domain)
-}
 
 func getUsers1(r io.Reader) (result users, err error) {
 	content, err := io.ReadAll(r) // stream
