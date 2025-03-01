@@ -39,20 +39,20 @@ class Program
         var deltaMemory = (memoryAfter - memoryBefore);
         if (deltaMemory <= MemoryLimit)
         {
-            Console.WriteLine($"Success!!! Memory:  {deltaMemory}");
+            Console.WriteLine($"Success!!! Memory:  {deltaMemory} mb");
         }
         else
         {
-            Console.WriteLine($"Fail!!! Memory:  {deltaMemory}");
+            Console.WriteLine($"Fail!!! Memory:  {deltaMemory} mb");
         }
         
         if (factTime < TimeLimitMilliseconds)
         {
-            Console.WriteLine($"Success!!! Elapsed time: {factTime}");
+            Console.WriteLine($"Success!!! Elapsed time: {factTime} ms");
         }
         else
         {
-            Console.WriteLine($"Fail!!! Elapsed time: {factTime}");
+            Console.WriteLine($"Fail!!! Elapsed time: {factTime} ms");
         }
         
         // Console.WriteLine(factTime);

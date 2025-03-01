@@ -2,7 +2,6 @@ package hw10programoptimization
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"io"
 	"regexp"
@@ -36,22 +35,49 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 	fScanner.Split(bufio.ScanLines)
 	domainRegex := //regexp.MustCompile("(?i)^(?:[^@]+@)(.+\\." + regexp.QuoteMeta(domain) + ")$")
 		//regexp.MustCompile("(?i)@(.+?)\\." + regexp.QuoteMeta(domain) + "$")
-		// regexp.MustCompile("(?i)@(.+\\." + regexp.QuoteMeta(domain) + ")$")
-		regexp.MustCompile("\\." + regexp.QuoteMeta(domain))
+		//regexp.MustCompile("(?i)@(.+\\." + regexp.QuoteMeta(domain) + ")$") // !!!
+		//regexp.MustCompile("\\." + regexp.QuoteMeta(domain))
+		regexp.MustCompile(`(?i)"Email"\s*:\s*"[^@]+@(.+\.` + regexp.QuoteMeta(domain) + `)"`)
 	for fScanner.Scan() {
-		var user User
-
-		err := json.Unmarshal(fScanner.Bytes(), &user)
+		err := calcDomainsNonJson(fScanner.Bytes(), &stats, domainRegex)
 		if err != nil {
-			continue
-		}
-		err = calcDomains(user, &stats, domainRegex)
-		if err != nil {
-			//	return nil, fmt.Errorf("failed calc domain", err)
 			return nil, err
 		}
+		//var user User
+		//
+		//err := json.Unmarshal(fScanner.Bytes(), &user)
+		//if err != nil {
+		//	continue
+		//}
+		//err = calcDomains(user, &stats, domainRegex)
+		//if err != nil {
+		//	//	return nil, fmt.Errorf("failed calc domain", err)
+		//	return nil, err
+		//}
 	}
 	return stats, nil
+}
+
+func calcDomainsNonJson(b []byte, stats *DomainStat, regexp *regexp.Regexp) error {
+
+	matches := regexp.FindSubmatch(b)
+	if len(matches) <= 1 {
+		return nil
+	}
+
+	//match := regexp.Match(b)
+	//if !match {
+	//	return nil
+	//}
+
+	//_, domain, found := strings.Cut(u.Email, "@")
+	//if !found {
+	//	return fmt.Errorf("invalid email address")
+	//}
+	(*stats)[(strings.ToLower(string(matches[1])))]++
+	//(*stats)[(domain)]++
+	//(*stats)[customToLowe(matches[1])]++
+	return nil
 }
 
 func calcDomains(u User, stats *DomainStat, regexp *regexp.Regexp) error {
