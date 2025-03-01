@@ -34,7 +34,10 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 
 	fScanner := bufio.NewScanner(r)
 	fScanner.Split(bufio.ScanLines)
-
+	domainRegex := //regexp.MustCompile("(?i)^(?:[^@]+@)(.+\\." + regexp.QuoteMeta(domain) + ")$")
+		//regexp.MustCompile("(?i)@(.+?)\\." + regexp.QuoteMeta(domain) + "$")
+		// regexp.MustCompile("(?i)@(.+\\." + regexp.QuoteMeta(domain) + ")$")
+		regexp.MustCompile("\\." + regexp.QuoteMeta(domain))
 	for fScanner.Scan() {
 		var user User
 
@@ -42,7 +45,7 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 		if err != nil {
 			continue
 		}
-		err = calcDomains(user, &stats)
+		err = calcDomains(user, &stats, domainRegex)
 		if err != nil {
 			//	return nil, fmt.Errorf("failed calc domain", err)
 			return nil, err
@@ -51,9 +54,15 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 	return stats, nil
 }
 
-func calcDomains(u User, stats *DomainStat) error {
+func calcDomains(u User, stats *DomainStat, regexp *regexp.Regexp) error {
 
-	if u.Email == "" || !emailRegex.MatchString(u.Email) {
+	//matches := regexp.FindStringSubmatch(u.Email)
+	//if len(matches) <= 1 {
+	//	return nil
+	//}
+
+	match := regexp.MatchString(u.Email)
+	if !match {
 		return nil
 	}
 
@@ -61,6 +70,30 @@ func calcDomains(u User, stats *DomainStat) error {
 	if !found {
 		return fmt.Errorf("invalid email address")
 	}
-	(*stats)[strings.ToLower(domain)]++
+	(*stats)[(strings.ToLower(domain))]++
+	//(*stats)[(domain)]++
+	//(*stats)[customToLowe(matches[1])]++
 	return nil
+}
+
+func customToLowe(s string) string {
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		//
+		if c >= 'A' && c <= 'Z' {
+
+			b := make([]byte, len(s))
+			copy(b, s[:i]) // здесь уже в нижнем регистре
+			for j := i; j < len(s); j++ {
+				c = s[j]
+				if c >= 'A' && c <= 'Z' {
+					b[j] = c + 32 // для ASCII сдвигаемся: A-65 => a-97
+				} else {
+					b[j] = c
+				}
+			}
+			return string(b)
+		}
+	}
+	return s
 }
