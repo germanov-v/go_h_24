@@ -2,7 +2,6 @@ package hw10programoptimization
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"regexp"
 	"strings"
@@ -20,12 +19,12 @@ type User struct {
 
 type DomainStat map[string]int
 
-type users [100_000]User // Array
+//type users [100_000]User // Array
 
-var (
-	emailRegex = regexp.MustCompile(`(?i)\.[a-z]{2,4}$`)
-	//regexp.MustCompile(`^[a-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[a-z]{2,4}$`)
-)
+//var (
+//	emailRegex = regexp.MustCompile(`(?i)\.[a-z]{2,4}$`)
+//	//regexp.MustCompile(`^[a-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[a-z]{2,4}$`)
+//)
 
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 
@@ -80,46 +79,47 @@ func calcDomainsNonJson(b []byte, stats *DomainStat, regexp *regexp.Regexp) erro
 	return nil
 }
 
-func calcDomains(u User, stats *DomainStat, regexp *regexp.Regexp) error {
+//
+//func calcDomains(u User, stats *DomainStat, regexp *regexp.Regexp) error {
+//
+//	//matches := regexp.FindStringSubmatch(u.Email)
+//	//if len(matches) <= 1 {
+//	//	return nil
+//	//}
+//
+//	match := regexp.MatchString(u.Email)
+//	if !match {
+//		return nil
+//	}
+//
+//	_, domain, found := strings.Cut(u.Email, "@")
+//	if !found {
+//		return fmt.Errorf("invalid email address")
+//	}
+//	(*stats)[(strings.ToLower(domain))]++
+//	//(*stats)[(domain)]++
+//	//(*stats)[customToLowe(matches[1])]++
+//	return nil
+//}
 
-	//matches := regexp.FindStringSubmatch(u.Email)
-	//if len(matches) <= 1 {
-	//	return nil
-	//}
-
-	match := regexp.MatchString(u.Email)
-	if !match {
-		return nil
-	}
-
-	_, domain, found := strings.Cut(u.Email, "@")
-	if !found {
-		return fmt.Errorf("invalid email address")
-	}
-	(*stats)[(strings.ToLower(domain))]++
-	//(*stats)[(domain)]++
-	//(*stats)[customToLowe(matches[1])]++
-	return nil
-}
-
-func customToLowe(s string) string {
-	for i := 0; i < len(s); i++ {
-		c := s[i]
-		//
-		if c >= 'A' && c <= 'Z' {
-
-			b := make([]byte, len(s))
-			copy(b, s[:i]) // здесь уже в нижнем регистре
-			for j := i; j < len(s); j++ {
-				c = s[j]
-				if c >= 'A' && c <= 'Z' {
-					b[j] = c + 32 // для ASCII сдвигаемся: A-65 => a-97
-				} else {
-					b[j] = c
-				}
-			}
-			return string(b)
-		}
-	}
-	return s
-}
+//func customToLower(s string) string {
+//	for i := 0; i < len(s); i++ {
+//		c := s[i]
+//		//
+//		if c >= 'A' && c <= 'Z' {
+//
+//			b := make([]byte, len(s))
+//			copy(b, s[:i]) // здесь уже в нижнем регистре
+//			for j := i; j < len(s); j++ {
+//				c = s[j]
+//				if c >= 'A' && c <= 'Z' {
+//					b[j] = c + 32 // для ASCII сдвигаемся: A-65 => a-97
+//				} else {
+//					b[j] = c
+//				}
+//			}
+//			return string(b)
+//		}
+//	}
+//	return s
+//}
