@@ -2,8 +2,8 @@ package hw10programoptimization
 
 import (
 	"bufio"
+	"bytes"
 	"io"
-	"regexp"
 	"strings"
 )
 
@@ -26,19 +26,24 @@ type DomainStat map[string]int
 //	//regexp.MustCompile(`^[a-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[a-z]{2,4}$`)
 //)
 
+const emailPatternJson = "\"Email\""
+
+const emailStartPatternJson = "@"
+const stopPatternJson = "\""
+
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 
 	stats := make(DomainStat)
 
 	fScanner := bufio.NewScanner(r)
 	fScanner.Split(bufio.ScanLines)
-	domainRegex := //regexp.MustCompile("(?i)^(?:[^@]+@)(.+\\." + regexp.QuoteMeta(domain) + ")$")
-		//regexp.MustCompile("(?i)@(.+?)\\." + regexp.QuoteMeta(domain) + "$")
-		//regexp.MustCompile("(?i)@(.+\\." + regexp.QuoteMeta(domain) + ")$") // !!!
-		//regexp.MustCompile("\\." + regexp.QuoteMeta(domain))
-		regexp.MustCompile(`(?i)"Email"\s*:\s*"[^@]+@(.+\.` + regexp.QuoteMeta(domain) + `)"`)
+	//domainRegex := //regexp.MustCompile("(?i)^(?:[^@]+@)(.+\\." + regexp.QuoteMeta(domain) + ")$")
+	//regexp.MustCompile("(?i)@(.+?)\\." + regexp.QuoteMeta(domain) + "$")
+	//regexp.MustCompile("(?i)@(.+\\." + regexp.QuoteMeta(domain) + ")$") // !!!
+	//regexp.MustCompile("\\." + regexp.QuoteMeta(domain))
+	//	regexp.MustCompile(`(?i)"Email"\s*:\s*"[^@]+@(.+\.` + regexp.QuoteMeta(domain) + `)"`)
 	for fScanner.Scan() {
-		err := calcDomainsNonJson(fScanner.Bytes(), &stats, domainRegex)
+		err := calcDomainsNonJsonNonRegex(fScanner.Bytes(), &stats, domain)
 		if err != nil {
 			return nil, err
 		}
@@ -57,27 +62,70 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 	return stats, nil
 }
 
-func calcDomainsNonJson(b []byte, stats *DomainStat, regexp *regexp.Regexp) error {
+func calcDomainsNonJsonNonRegex(b []byte, stats *DomainStat, domain string) error {
 
-	matches := regexp.FindSubmatch(b)
-	if len(matches) <= 1 {
+	startIdx := bytes.Index(b, []byte(emailPatternJson))
+	if startIdx == -1 {
 		return nil
 	}
 
-	//match := regexp.Match(b)
-	//if !match {
-	//	return nil
-	//}
+	startByte := b[startIdx+len(emailPatternJson):]
 
-	//_, domain, found := strings.Cut(u.Email, "@")
-	//if !found {
-	//	return fmt.Errorf("invalid email address")
-	//}
-	(*stats)[(strings.ToLower(string(matches[1])))]++
-	//(*stats)[(domain)]++
-	//(*stats)[customToLowe(matches[1])]++
+	startIdx = bytes.Index(startByte, []byte(emailStartPatternJson))
+
+	if startIdx == -1 {
+		//return errors.New("invalid email address: lost @")
+		return nil
+	}
+
+	startByte = startByte[startIdx+1:]
+
+	startIdx = bytes.Index(startByte, []byte(stopPatternJson))
+
+	if startIdx == -1 {
+		//return errors.New("invalid email address: lost @")
+		return nil
+	}
+
+	startByte = startByte[:startIdx]
+
+	domainIdx := bytes.Index(startByte, []byte(domain))
+
+	if domainIdx == -1 {
+		//	return fmt.Errorf("invalid email address: lost %s", domain)
+		return nil
+	}
+
+	data := startByte[:domainIdx+len(domain)]
+
+	dataStr := string(data)
+	(*stats)[(strings.ToLower(string(dataStr)))]++
+
 	return nil
 }
+
+//
+//func calcDomainsNonJson(b []byte, stats *DomainStat, regexp *regexp.Regexp) error {
+//
+//	matches := regexp.FindSubmatch(b)
+//	if len(matches) <= 1 {
+//		return nil
+//	}
+//
+//	//match := regexp.Match(b)
+//	//if !match {
+//	//	return nil
+//	//}
+//
+//	//_, domain, found := strings.Cut(u.Email, "@")
+//	//if !found {
+//	//	return fmt.Errorf("invalid email address")
+//	//}
+//	(*stats)[(strings.ToLower(string(matches[1])))]++
+//	//(*stats)[(domain)]++
+//	//(*stats)[customToLowe(matches[1])]++
+//	return nil
+//}
 
 //
 //func calcDomains(u User, stats *DomainStat, regexp *regexp.Regexp) error {
