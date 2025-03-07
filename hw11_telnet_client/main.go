@@ -52,10 +52,11 @@ func main() {
 		err := client.Receive()
 		// Надо stderr тут
 		if err != nil {
-			fmt.Printf("Error receiving: %v\n", err)
+			fmt.Fprintf(os.Stderr, "connection was closed by: %v\n", err)
+
 		} else {
 			//fmt.Printf(os.Stderr, "Received SIGINT %v\n")
-			fmt.Printf("Received SIGINT\n")
+			fmt.Fprintln(os.Stderr, "end of line detected")
 		}
 		done <- struct{}{}
 	}()
@@ -64,11 +65,8 @@ func main() {
 		err := client.Send()
 		if err != nil {
 			//fmt.Printf("Error sending: %v\n", err)
-			_, err := fmt.Fprintf(os.Stderr, "Received SIGINT %v\n", err)
-			if err != nil {
-				return
-			}
-
+			//_, err := fmt.Fprintf(os.Stderr, "Received SIGINT %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error sending: %v\n", err)
 		}
 		//done <- true
 		done <- struct{}{}
