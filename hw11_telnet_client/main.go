@@ -75,6 +75,10 @@ func main() {
 	select {
 	case <-sChan:
 		fmt.Fprintln(os.Stderr, "SIGINT, exit")
+		err := client.Close()
+		if err != nil {
+			return
+		}
 	case <-done:
 	}
 
