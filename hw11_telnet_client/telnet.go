@@ -67,7 +67,6 @@ func (t *telnetClient) Send() error {
 	return err
 }
 
-// io.EOF - это не ошибка!
 func (t *telnetClient) Receive() error {
 	//_,err := io.Copy(t.conn, t.in)
 	//return err
@@ -77,9 +76,9 @@ func (t *telnetClient) Receive() error {
 	//	return err
 	//}
 
-	if err == io.EOF {
-		return nil
-	}
+	//if err == io.EOF {
+	//	return nil
+	//}
 
 	return err
 }

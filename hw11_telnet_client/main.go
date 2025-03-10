@@ -46,7 +46,7 @@ func main() {
 
 	//done := make(chan bool, 1)
 	//done := make(chan interface{}, 1)
-	done := make(chan struct{}, 1)
+	done := make(chan struct{}, 2)
 
 	go func() {
 		err := client.Receive()
