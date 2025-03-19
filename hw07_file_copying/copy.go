@@ -37,7 +37,8 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	if err != nil {
 		// оборачиваем исходную ошибку. пример:  *os.PathError,
 		// ErrOpenFile
-		return ErrOpenFile
+		//return ErrOpenFile
+		return fmt.Errorf("%w: %s", ErrOpenFile, err)
 	}
 	defer func(src *os.File) {
 		err := src.Close()
@@ -51,18 +52,23 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	fileInfo, err := src.Stat()
 	if err != nil {
 		//ErrGetFileInfo
-		return ErrGetFileInfo
+		//return ErrGetFileInfo
+		return fmt.Errorf("%w: %s", ErrSourceDestinationSameFile, err)
 	}
 
 	// под ErrUnsupportedFile: не /dev/nukl, dir, slink, (socket?)
 	if !fileInfo.Mode().IsRegular() {
 		//  return fmt.Errorf("%s is not a regular file", fromPath)
-		return ErrUnsupportedFile
+
+		//return ErrUnsupportedFile
+		return fmt.Errorf("error: %w", ErrUnsupportedFile)
 	}
 
 	size := fileInfo.Size()
 	if size < offset {
-		return ErrOffsetExceedsFileSize
+
+		//return ErrOffsetExceedsFileSize
+		return fmt.Errorf("error: %w", ErrOffsetExceedsFileSize)
 	}
 
 	if limit == 0 || size-offset < limit {
@@ -72,13 +78,15 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	_, err = src.Seek(offset, io.SeekStart)
 	if err != nil {
 		//ErrCreateFile
-		return ErrSeekFile
+		//return ErrSeekFile
+		return fmt.Errorf("%w: %s", ErrSeekFile, err)
 	}
 
 	destination, err := os.Create(toPath)
 	if err != nil {
 		// ErrSeek
-		return ErrCreateFile
+		//return ErrCreateFile
+		return fmt.Errorf("%w: %s", ErrCreateFile, err)
 	}
 
 	defer destination.Close()
@@ -99,7 +107,8 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	//err = CopyByPartial(destination, reader, 5)
 	if err != nil && err != io.EOF {
 		// ErrCopyFile
-		return ErrCopyFile
+		//return ErrCopyFile
+		return fmt.Errorf("%w: %s", ErrCopyFile, err)
 	}
 
 	return nil
