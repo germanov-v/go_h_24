@@ -1,3 +1,3 @@
-module github.com/fixme_my_friend/hw12_13_14_15_calendar
+module github.com/germanov-v/go_h_24/hw12_13_14_15_calendar
 
-go 1.22
+go 1.23.2

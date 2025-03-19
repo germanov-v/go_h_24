@@ -1,0 +1,8 @@
+[logger]
+level = "INFO"
+
+
+[database]
+connectionStrin = "CONNECT"
+
+
