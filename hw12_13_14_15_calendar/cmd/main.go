@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-// TODO: PANIC!
+// TODO: PANIC discuss!
 func App(pathConfig string) http.Handler {
 
 	_, err := configs.LoadConfig(pathConfig)
