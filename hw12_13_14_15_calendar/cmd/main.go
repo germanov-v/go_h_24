@@ -35,13 +35,16 @@ func main() {
 		panic(err)
 	}
 
+	var logFile *os.File
 	if config.LogConfig.Providers.File != "" {
-		logFile, err := os.OpenFile(config.LogConfig.Providers.File, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		logFile, err = os.OpenFile(config.LogConfig.Providers.File, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Fatal("Error open file log occurred", err)
 		}
+		// здесь нужно замые
 		defer logFile.Close()
 		log.SetOutput(logFile)
+
 	}
 
 	app := InitialApp(config)
