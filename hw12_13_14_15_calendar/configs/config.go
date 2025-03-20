@@ -7,10 +7,14 @@ import (
 )
 
 type Config struct {
+	ServerConfig `json:"Server"`
 	DbBaseConfig `json:"Database"`
-	LogLevel     `json:"LogLevel"`
+	LogConfig    `json:"Logs"`
 }
-
+type ServerConfig struct {
+	Host string `json:"Host"`
+	Port int    `json:"Port"`
+}
 type DbBaseConfig struct {
 	ConnectionString string `json:"ConnectionString"`
 }
@@ -25,8 +29,13 @@ const (
 	Trace LogLevel = "TRACE"
 )
 
-type LogLevelsConfig struct {
-	level LogLevel
+type LogConfig struct {
+	Level     LogLevel    `json:"Level"`
+	Providers LogProvider `json:"Providers"`
+}
+
+type LogProvider struct {
+	File string `json:"File"`
 }
 
 func LoadConfig(path string) (*Config, error) {
@@ -41,6 +50,12 @@ func LoadConfig(path string) (*Config, error) {
 	decoder := json.NewDecoder(file)
 	if err := decoder.Decode(&config); err != nil {
 		return nil, fmt.Errorf("failed to decode config file: %w", err)
+	}
+
+	switch config.LogConfig.Level {
+	case Info, Debug, Error, Warn, Trace:
+	default:
+		return nil, fmt.Errorf("unknown config level: %s", config.LogConfig.Level)
 	}
 
 	// из стека в кучу

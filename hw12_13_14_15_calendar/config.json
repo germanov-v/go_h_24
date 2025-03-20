@@ -1,6 +1,19 @@
 {
-  "Database" : {
-    "ConnectionString": ""
+  "Server": {
+    "Host": "127.0.0.1",
+    "Port": 8080
   },
-  "LogLevel": "INFO"
+  "Database" : {
+    "ConnectionString": "CONNECT_DB"
+  },
+
+  "Logs": {
+    "Level": "INFO",
+    "Providers": {
+      "File":  "logs.log",
+      "ELK": {
+        "Url": ""
+      }
+    }
+  }
 }
