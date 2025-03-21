@@ -25,12 +25,12 @@ type timeHandler struct {
 
 // https://www.alexedwards.net/blog/an-introduction-to-handlers-and-servemuxes-in-go
 func (dH dataHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	event := storage_v2.EventItem{}
-	_, err := dH.storage.CreateEvent(event, ctx)
-	if err != nil {
-		return
-	}
+	//ctx := r.Context()
+	//event := storage_v2.EventItem{}
+	//_, err := dH.storage.CreateEvent(event, ctx)
+	//if err != nil {
+	//	return
+	//}
 	tm := time.Now().Format(dH.format)
 	w.Write([]byte("The time is: " + tm))
 }

@@ -22,7 +22,7 @@ func LogProvider(next http.Handler) http.Handler {
 		//log.Println(wrapper.StatusCode, now, now.Sub(now))
 		ip := r.RemoteAddr
 		logEntry := fmt.Sprintf(
-			`%s [%s] "%s %s %s" %d %d "%s"`,
+			`%s [%s] "%s %s %s" %d %s "%s"`,
 			ip,
 			now.Format("02/Jan/2006:15:04:05 -0700"),
 			r.Method,

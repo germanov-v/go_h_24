@@ -8,7 +8,6 @@ import (
 	"github.com/germanov-v/go_h_24/hw12_13_14_15_calendar/pkg/middleware"
 	"github.com/germanov-v/go_h_24/hw12_13_14_15_calendar/pkg/storage_v2"
 	"github.com/jmoiron/sqlx"
-
 	_ "github.com/lib/pq"
 
 	"log"
@@ -18,20 +17,19 @@ import (
 )
 
 // TODO: PANIC discuss!
-func InitialApp(config *configs.Config) http.Handler {
+func InitialApp(config *configs.Config, logFile *os.File) http.Handler {
 
 	// https://golangify.com/routing-servemux
 	router := http.NewServeMux()
 
 	var err error
-	var logFile *os.File
+	//var logFile *os.File
 	if config.LogConfig.Providers.File != "" {
 		logFile, err = os.OpenFile(config.LogConfig.Providers.File, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Fatal("Error open file log occurred", err)
 		}
-		// здесь нужно замые
-		defer logFile.Close()
+
 		log.SetOutput(logFile)
 
 	}
@@ -64,9 +62,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	app := InitialApp(config)
-
+	var logFile *os.File
+	app := InitialApp(config, logFile)
+	defer logFile.Close()
 	server := http.Server{
 		Addr:    config.ServerConfig.Host + ":" + strconv.Itoa(config.ServerConfig.Port),
 		Handler: app,
@@ -77,4 +75,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 }
