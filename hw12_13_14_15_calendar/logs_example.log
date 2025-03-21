@@ -1,0 +1,2 @@
+[21/Mar/2025:05:26:13 +0000] "GET / HTTP/1.1" 200  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
+2025/03/21 08:26:13 127.0.0.1:50100 [21/Mar/2025:05:26:13 +0000] "GET /favicon.ico HTTP/1.1" 200  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
