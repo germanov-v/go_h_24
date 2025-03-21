@@ -1,4 +1,6 @@
-CREATE TABLE events (
+CREATE schema 'events'
+
+CREATE TABLE events.events (
                         id UUID PRIMARY KEY,
                         title TEXT NOT NULL,
                         start_time TIMESTAMP NOT NULL,

@@ -1,11 +1,11 @@
 {
   "Server": {
     "Host": "127.0.0.1",
-    "Port": 8080,
+    "Port": 8080
   },
   "Database" : {
-    "ConnectionString": "CONNECT_DB"
-  },
+    "ConnectionString": "host=127.0.0.1 port=5432 user=postgres password=postgres dbname=go_events sslmode=disable"
+   },
 
   "Logs": {
     "Level": "INFO",
